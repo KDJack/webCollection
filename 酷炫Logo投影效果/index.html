@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+<meta charset="UTF-8">
+<title>Carpe Noctem</title>
+
+
+
+<link rel="stylesheet" href="css/style.css">
+
+
+</head>
+
+<body>
+
+<script src="js/three.min.js"></script>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+void main() {
+	gl_Position = vec4( position, 1.0 );
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+  
+  uniform vec2 u_resolution;
+  uniform vec2 u_mouse;
+  uniform float u_time;
+  uniform sampler2D u_noise;
+  uniform bool u_mousemoved;
+
+  const bool shapeTest = false; // Whether to just show the shape test
+  const bool addNoise = true; // Whether to add noise to the rays
+  const float decay = .98; // the amount to decay each sample by
+  const float exposure = .2; // the screen exposure
+  const vec3 lightcolour = vec3(.5); // the colour of the light
+  const vec3 falloffcolour = vec3(1.0, 1.0, 1.3); // the colour of the falloff
+  const vec3 bgcolour = vec3(.05, 0.1, .1); // the base colour of the render
+  const float falloff = .5;
+  const int samples = 16; // The number of samples to take
+  const float density = .95; // The density of the "smoke"
+  const float weight = .25; // how heavily to apply each step of the supersample
+  const int octaves = 1; // the number of octaves to generate in the FBM noise
+  const float seed = 43758.5453123; // A random seed :)
+  
+  #define PI 3.141592653589793
+  #define TAU 6.283185307179586
+  
+  float starSDF(vec2 st, int V, float s) {
+      // st = st*4.-2.;
+      float a = atan(st.y, st.x)/TAU;
+      float seg = a * float(V);
+      a = ((floor(seg) + 0.5)/float(V) + 
+          mix(s,-s,step(.5,fract(seg)))) 
+          * TAU;
+      return abs(dot(vec2(cos(a),sin(a)),
+                     st));
+  }
+  
+  float random2d(vec2 uv) {
+    uv /= 256.;
+    vec4 tex = texture2D(u_noise, uv, 0.);
+    return mix(tex.x, tex.y, tex.a);
+  }
+  vec2 random2(vec2 st, float seed){
+      st = vec2( dot(st,vec2(127.1,311.7)),
+                dot(st,vec2(269.5,183.3)) );
+      return -1.0 + 2.0*fract(sin(st)*seed);
+  }
+  
+  // Value Noise by Inigo Quilez - iq/2013
+  // https://www.shadertoy.com/view/lsf3WH
+  float noise(vec2 st, float seed) {
+    vec3 x = vec3(st, 1.);
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+    f = f*f*(3.0-2.0*f);
+    vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
+    vec2 rg = texture2D(u_noise, (uv+0.5) / 256., 0.).yx - .5;
+    return mix( rg.x, rg.y, f.z );
+  }
+  
+  float fbm1(in vec2 _st, float seed) {
+    float v = 0.0;
+    float a = 0.5;
+    vec2 shift = vec2(100.0);
+    // Rotate to reduce axial bias
+    mat2 rot = mat2(cos(0.5), sin(0.5),
+                    -sin(0.5), cos(0.50));
+    for (int i = 0; i < octaves; ++i) {
+        v += a * noise(_st, seed);
+        _st = rot * _st * 2.0 + shift;
+        a *= 0.4;
+    }
+    return v + .4;
+  }
+  // Card 4
+  float stroke(float x, float s, float w) {
+    float d = step(s, x+w*.5) - step(s, x-w*.5);
+    return clamp(d, 0., 1.);
+  }
+  float circle(vec2 uv) {
+    return length(uv-.5)*2.;
+  }
+  float star(vec2 uv, int V, float s) {
+    float v = float(V);
+    uv = uv * 4. - 2.;
+    float a = atan(uv.y, uv.x)/TAU;
+    float seg = a * v;
+    a = (
+          (floor(seg) + .5)/v +
+          mix(s, -s, step(.5, fract(seg)))
+        ) * TAU;
+    return abs( dot( vec2(cos(a), sin(a)), uv ) );
+  }
+  
+  float pattern(vec2 uv, float seed, float time, inout vec2 q, inout vec2 r) {
+
+    q = vec2( fbm1( uv + vec2(0.0,0.0), seed ),
+                   fbm1( uv + vec2(5.2,1.3), seed ) );
+
+    r = vec2( fbm1( uv + 4.0*q + vec2(1.7 - time / 2.,9.2), seed ),
+                   fbm1( uv + 4.0*q + vec2(8.3 - time / 2.,2.8), seed ) );
+
+    float rtn = fbm1( uv + 4.0*r, seed );
+
+    return rtn;
+  }
+  
+  float tri(vec2 uv) {
+    uv = (uv * 2.-1.)*2.;
+    return max(abs(uv.x) * 0.866025 + uv.y * 0.5, -uv.y * 0.5);
+  }
+
+  float shapes(vec2 uv) {
+    
+    uv *= .5;
+    uv += .5;
+    
+    float sh = 0.;
+    
+    sh += stroke(circle(uv), .6, .12);
+    uv.y = 1.-uv.y;
+    float s = star(uv.yx, 5, .1);
+    sh *= step(.7, s);
+    sh += stroke(s, .4, .2);
+    s = star(uv.yx, -5, .1);
+    sh *= step(.7, s);
+    sh += stroke(s, .4, .2);
+    
+    return 1.-sh;
+    
+    if(!shapeTest) {
+      uv += vec2(.5,-.1);
+
+      float shape = 0.;
+      shape = smoothstep(0.9, 0.89, tri(uv));
+      shape += smoothstep(0.9, 0.89, tri(uv + vec2(.515, .89)));
+      shape += smoothstep(0.9, 0.89, tri(uv + vec2(-.515, .89)));
+      
+      return 1. - shape;
+    } else {
+      uv *= 1.5;
+
+      uv.x += u_time / 10.;
+      uv += vec2(100.);
+      vec2 grid = floor(uv);
+      uv = fract(uv) - .5;
+      float rand = random2d(grid) * 13. - 4.;
+      float id = floor(rand);
+
+      if(id == 0.) {
+        float scale = (sin((u_time) / 2. + grid.x + grid.y / 10.) + 1.5) * .5 * rand;
+        // float smooth = (cos(u_time / 2.) + 1.) * .01;
+        return 1. - smoothstep(0.4 * scale, 0.401 * scale, length(uv));
+      } else if(id == 2.) {
+        float t = u_time + rand;
+        uv *= mat2(cos(t), -sin(t), sin(t), cos(t));
+        vec2 rect = uv;
+        return smoothstep(.25, .24, max(abs(rect.x / 1.), abs(rect.y / .5)));
+      } else if(id == 3.) {
+        float star = starSDF(uv * 1.5, 3, .5);
+        return smoothstep(0.09, .1, star) * smoothstep(0.3, .29, star);
+      } else if(id == 4.) {
+        float t = u_time + rand;
+        uv *= mat2(cos(t), -sin(t), sin(t), cos(t));
+        return 1. - smoothstep(0.19, .2, starSDF(uv * 1.5, 5, .325));
+      } else if(id == 5.) {
+        float t = u_time * -1. * rand * .5;
+        uv *= mat2(cos(t), -sin(t), sin(t), cos(t));
+        vec2 rect = uv;
+        return smoothstep(.45, .44, max(abs(rect.x / 1.), abs(rect.y / .5)));
+      } else if(id == 6.) {
+        float t = u_time + rand;
+        uv *= mat2(cos(t), -sin(t), sin(t), cos(t));
+        float star = starSDF(uv * 1.5, 3, .5);
+        return smoothstep(0.1, .09 + rand, star);
+      }
+
+      return 0.;
+    }
+    
+  }
+  
+  float occlusion(vec2 uv, vec2 lightpos, float objects) {
+    return (1. - smoothstep(0.0, 3.5, length(lightpos - uv))) * (1. - objects);
+  }
+  
+  vec4 mainRender(vec2 uv, inout vec4 fragcolour) {
+  
+    float scale = 3.;
+    uv *= scale;
+    
+    float exposure = exposure + (sin(u_time) * .5 + 1.) * .05;
+
+    vec2 _uv = uv;
+    vec2 lightpos = (vec2(u_mouse.x, u_mouse.y * -1.) * .5 ) / u_resolution.y;
+    lightpos = u_mouse * scale;
+    
+    if(!u_mousemoved) {
+      lightpos.x += cos(u_time * .25);
+      lightpos.y += sin(u_time * .5);
+    }
+    
+    float obj = shapes(uv);
+    float map = occlusion(uv, lightpos, obj);
+    float dither = random2d(uv * 2. * 256. + mod(u_time * 2000., 256.)) * 2.;
+    // dither = 0.;
+
+    float _pattern = 0.;
+    vec2 q = vec2(0.);
+    vec2 r = vec2(0.);
+    if(addNoise) {
+      _pattern = pattern(_uv * 2. , seed, u_time, q, r) / 2.;
+    }
+
+    vec2 dtc = (_uv - lightpos) * (1. / float(samples) * density);
+    // dtc += _pattern / 80.;
+    float illumination_decay = 1.;
+    vec3 basecolour = vec3(0.);
+
+    for(int i=0; i<samples; i++) {
+      _uv -= dtc;
+      if(addNoise) {
+        uv += _pattern / 16.;
+      }
+
+      float stepped_map = occlusion(uv, lightpos, shapes(_uv+dtc*dither));
+      stepped_map *= illumination_decay * weight;
+      illumination_decay *= decay;
+
+      if(length(basecolour) == 0.) {
+        vec2 suv = _uv+dtc;
+        suv /= 1.5;
+        suv /= 3.;
+        suv += u_mouse / 15.;
+        suv += .5;
+        float lightDist = clamp( 1. - length(lightpos - uv), 0., 1.);
+
+        basecolour = bgcolour;
+      }
+
+      map += stepped_map;
+    }
+
+    float l = length(lightpos - uv);
+
+    vec3 lightcolour = mix(lightcolour, falloffcolour, l*falloff);
+
+    vec3 colour = vec3(basecolour+map*exposure*lightcolour);
+    
+    fragcolour = vec4(colour,1.0);
+    return fragcolour;
+  }
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+  
+  mainRender(uv, gl_FragColor);
+}
+</script>
+
+<div id="container" touch-action="none"></div>
+
+
+<script  src="js/script.js"></script>
+
+
+</body>
+</html>
