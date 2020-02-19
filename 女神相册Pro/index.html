@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Document</title>
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        -webkit-user-select: none; /* Webkit */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE 10  */
+        /* Currently not supported in Opera but will be soon */
+        -o-user-select: none;
+        user-select: none;
+    }
+    .pic {
+        width: 160px;
+        height: 220px;
+        margin: 200px auto 0;
+        position: relative;
+        /*transform 旋转元素*/
+        transform-style: preserve-3d;
+        transform: perspective(800px) rotateX(-10deg) rotateY(0deg);
+    }
+    body {
+        background-color: black;
+        overflow: hidden;
+    }
+    .pic img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px #fff;
+        /*倒影的设置*/
+        -webkit-box-reflect: below 10px -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, .5) 100%);
+    }
+    .pic p {
+        width: 1200px;
+        height: 1200px;
+        background: -webkit-radial-gradient(center center, 600px 600px, rgba(255, 255, 255, .5), rgba(0, 0, 0, 0));
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-top: -600px;
+        margin-left: -600px;
+        border-radius: 600px;
+        transform: rotateX(90deg);
+    }
+</style>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+
+<body>
+<div class="pic">
+    <p></p>
+</div>
+<div class="preloader">
+    <div class="preloader__ring">
+        <div class="preloader__sector">❤</div>
+        <div class="preloader__sector">K</div>
+        <div class="preloader__sector">I</div>
+        <div class="preloader__sector">K</div>
+        <div class="preloader__sector">U</div>
+        <div class="preloader__sector">❤</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector"></div>
+    </div>
+    <div class="preloader__ring">
+        <div class="preloader__sector">❤</div>
+        <div class="preloader__sector">K</div>
+        <div class="preloader__sector">I</div>
+        <div class="preloader__sector">K</div>
+        <div class="preloader__sector">U</div>
+        <div class="preloader__sector">❤</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector">—</div>
+        <div class="preloader__sector"></div>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script src='js/simplex-noise.min.js'></script>
+<script src='js/XeZBab.js'></script>
+<script src="js/script.js"></script>
+<script type="text/javascript">
+    window.canvasOptions = {
+        autoClear: true,
+        autoCompensate: false,
+        autoPushPop: true,
+        canvas: true,
+        //- centered: true,
+        desynchronized: false,
+        width: null,
+        height: null
+    };
+    $(function () {
+        var imgL = 15;
+        var deg = 360 / imgL;
+        var roY = 0, roX = -20;
+        var xN = 0, yN = 0;
+        var play = null;
+        var direct = 1;
+        var tranZ = 500
+        for (let i = 1; i <= imgL; i++) {
+            $('<img/>', { src: 'http://q5y1d5x3s.bkt.clouddn.com/' + i + '.jpg', ondragstart: 'return false' }).css({
+                <!-- translateZ 定义2d旋转沿着z轴 -->
+                "transform": "rotateY(" + i * deg + "deg) translateZ(" + tranZ + "px)"
+            }).appendTo($(".pic"))
+            // $(".pic").append('<img src="img/' + i + '.jpg"/>')
+        }
+        midel();
+        var picPlay = setInterval(goPic, 30)
+        function midel() {
+            // 居中
+            $('.pic').css({
+                marginTop: (window.innerHeight - 540) / 2
+            })
+            $('.preloader').css({
+                top: (window.innerHeight - 560) / 2,
+                left: (window.innerWidth - 400) / 2
+            })
+        }
+        function goPic() {
+            $('.pic').css({
+                transform: 'perspective(800px) rotateX(' + roX + 'deg) rotateY(' + roY + 'deg)'
+            });
+            roY += 0.1 * direct
+        }
+        $(document).mousedown(function (ev) {
+            var x_ = ev.clientX;
+            var y_ = ev.clientY;
+            clearInterval(picPlay);
+            clearInterval(play);
+            for (let i = 0; i < (picPlay < play ? play : picPlay); i++) {
+                clearInterval(i)
+            }
+            $(this).bind('mousemove', function (ev) {
+                /*获取当前鼠标的坐标*/
+                var x = ev.clientX;
+                var y = ev.clientY;
+                /*两次坐标之间的距离*/
+                xN = x - x_;
+                yN = y - y_;
+                roY += xN * 0.2;
+                roX -= yN * 0.1;
+                if (roX < -30) {
+                    roX = -30
+                } else if (roX > 15){
+                    roX = 15
+                }
+                $('.pic').css({
+                    transform: 'perspective(800px) rotateX(' + roX + 'deg) rotateY(' + roY + 'deg)'
+                });
+                /*之前的鼠标坐标*/
+                x_ = ev.clientX;
+                y_ = ev.clientY;
+
+            });
+        }).mouseup(function () {
+            $(this).unbind('mousemove');
+            direct = xN >= 0 ? 1 : -1
+            var play = setInterval(function () {
+                xN *= 0.95;
+                yN *= 0.95
+                if (Math.abs(xN) < 1 && Math.abs(yN) < 1) {
+                    clearInterval(play);
+                    picPlay = setInterval(goPic, 30)
+                }
+                roY += xN * 0.2;
+                roX -= yN * 0.1 * 0.1;
+                if (roX < -30) {
+                    roX = -30
+                } else if (roX > 15){
+                    roX = 15
+                }
+                $('.pic').css({
+                    transform: 'perspective(800px) rotateX(' + roX + 'deg) rotateY(' + roY + 'deg)'
+                });
+            }, 30);
+        });
+        $(document).on('mousewheel DOMMouseScroll', function(e) {
+            var wheel = e.originalEvent.wheelDelta || -e.originalEvent.detail;
+            var delta = Math.max(-1, Math.min(1, wheel) );
+            tranZ += delta * 20
+            $(".pic img").each(function (i) {
+                $(this).css({
+                    "transform": "rotateY(" + i * deg + "deg) translateZ(" + tranZ + "px)"
+                });
+            });
+        });
+        window.addEventListener('resize', midel);
+    });
+</script>
+</body>
+</html>
