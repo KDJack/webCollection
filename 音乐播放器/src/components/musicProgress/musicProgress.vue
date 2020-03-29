@@ -1,0 +1,154 @@
+<!-- 播放进度条组件 -->
+<template>
+  <div ref="progress" class="music-progress" @click="changeProgress">
+    <div class="progress"></div>
+    <div class="progress-btn" :class="{active:playStatus}" :style="{left:currentTimePercent+'%'}"></div>
+    <div @mousedown="mousedown"
+         class="progress-btn-inner"
+         :class="{active:playStatus}"
+         :style="{left:currentTimePercent+'%'}">
+    </div>
+
+  </div>
+</template>
+
+<script>
+  import { mapState, mapGetters, mapMutations } from 'vuex'
+
+  export default {
+    name: 'musicProgress',
+    data() {
+      return {
+        dragFlag: false, // 当前是否正在拖动
+        dragPlayFlag: false // 拖动开始的时候，是否处于播放状态
+      }
+    },
+    computed: {
+      ...mapState(['playStatus']),
+      ...mapGetters(['currentTimePercent'])
+    },
+    watch: {},
+    methods: {
+      ...mapMutations(['setCurrentPoint', 'setIsDrag', 'setPlayStatus']),
+
+      /**
+       * 进度条点击事件
+       */
+      changeProgress(e) {
+        const offset = e.pageX - this.$refs.progress.getBoundingClientRect().left
+        if (offset <= 0) {
+          this.setCurrentPoint(0)
+        } else if (offset >= this.$refs.progress.offsetWidth) {
+          this.setCurrentPoint(1)
+        } else {
+          this.setCurrentPoint(offset / this.$refs.progress.offsetWidth)
+        }
+      },
+      mousedown() {
+        this.dragFlag = true
+        this.dragPlayFlag = this.playStatus
+        this.setPlayStatus(false)
+      }
+    },
+    mounted() {
+      /**
+       * 进度条拖动事件
+       */
+      document.onmousemove = (e) => {
+        e.preventDefault()
+        if (this.dragFlag) {
+          const offset = e.clientX - this.$refs.progress.getBoundingClientRect().left
+          if (offset <= 0) {
+            this.setCurrentPoint(0)
+          } else if (offset >= this.$refs.progress.offsetWidth) {
+            this.setCurrentPoint(1)
+          } else {
+            this.setCurrentPoint(offset / this.$refs.progress.offsetWidth)
+          }
+        }
+      }
+
+      document.onmouseup = (e) => {
+        if (this.dragFlag) {
+          this.setPlayStatus(this.dragPlayFlag)
+          this.dragFlag = false
+        }
+      }
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+  .music-progress {
+    position: relative;
+    width: 1.8rem;
+    height: 0.12rem;
+
+    .progress {
+      position: absolute;
+      top: 50%;
+      margin-top: -1px;
+      height: 2px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      -webkit-app-region: no-drag;
+    }
+
+    .progress-btn {
+      position: absolute;
+      top: 0;
+      margin-left: -0.06rem;
+      transform-origin: 50% 50%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      width: 0.12rem;
+      height: 0.12rem;
+      z-index: -1;
+      animation: scaleBtn 0.6s ease-in infinite alternate;
+      animation-play-state: paused;
+
+      &.active {
+        animation-play-state: running;
+      }
+    }
+
+    .progress-btn-inner {
+      position: absolute;
+      top: 0px;
+      margin-left: -0.06rem;
+      width: 0.12rem;
+      height: 0.12rem;
+      opacity: 0.4;
+      background-image: url("./img/btn.png");
+      background-size: 100% 100%;
+      cursor: pointer;
+      z-index: 999;
+      -webkit-app-region: no-drag;
+      animation: rotateBtn 2s linear infinite;
+      animation-play-state: paused;
+
+      &.active {
+        animation-play-state: running;
+      }
+    }
+
+    @keyframes scaleBtn {
+      from {
+        transform: scale(0.8, 0.8);
+      }
+      to {
+        transform: scale(1.2, 1.2);
+      }
+    }
+
+    @keyframes rotateBtn {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+  }
+</style>

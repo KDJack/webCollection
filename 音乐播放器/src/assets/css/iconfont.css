@@ -1,0 +1,45 @@
+@font-face {font-family: "iconfont-";
+  src: url('font/iconfont.eot?t=1582364888595'); /* IE9 */
+  src: url('font/iconfont.eot?t=1582364888595#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAPgAAsAAAAACPQAAAOSAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDTgqERINkATYCJAMcCxAABCAFhHkHYRu5BxEVnN/IfhTGMbFOe+yNRYyXV5TnjX0fguerv95zux8cSTMBpCWt+cH6V1apCYCtTbuGMRGGKTkPvssyk294Zsh3HBxL/WrgPPpo9simLKsGfHrAAotcNI6KZDib64axi8t4HQJ45KYkUr9h8/Y4GGjHBJDhQwb1wYm5MEoaBQfByrnVQFZj4qgl6gGwyv15+Ut5cUBharQ3tR7YoD+1E1FKXM9Ozqa7ns/8/gIAcxdooCRggEzMDY1G+9mSaDzp6Qb1AQ8HhUpEicyJrCnxZFJGZkLFdCtKe3gE+jYQTCwUGv7zxEKrDwDoDHMWJCKTC4FEJi5MSGRWlZuzQi4UpMS40JAS19ymehuAyK85ANxHs1R0c4JC9O/OaBglS+bOPk3G7lt6ISuzsbZcXFZi3P4csnWa73jTQifotH6jmHM2ZRqwIZN2nrDf95ftxZi9x/OW7hO9PmP/CgoYmLZpQ07D+swDN2ZWUF1uMesn1KYsg0QFFpvmLd2DGrtRxJq911+WZZySw6r9Ys/ZN61iYNymvfnRPZnHdoGwH1Gl3Elmnqwb3xwVy6xKRJvjdWP++mnQax09+z//YQeuzys96USwxj85ORarkCHu71zsypYO8Kv7BOP/QukMFWKxRTuCeMYKVLn2dNIJf21tYsYy5GoBLagWX7zTj8NHUu35jEth/nBeq21trSh9eCVMH1ltI4Z5acMlFXEuilWheJ3Uo+mupDuaWnR5JgDJOXqpngXJ2Vq/AqDXqHcAerWryENdciSnQ8v832EfX+98XZSniaU618UuvJuU7Q1KJKcb1DPxTs3UVr98dc0JQ9ZqbtsQ+5tNCGBTsielvcTDA157LD2f+rNkql0PgkumEBQ2uUHjUghpYEuDiU8VsHCpCx4laHa3TwYmohHDBYqzBICQnuOgiLgJmvQ8RxrYn2CSmX9gkV5C8OgoeR7pU1gc7lJPsFRsoPoD1+NAhlcvXpt3Q+O6UuI6SH+hLJyEyA/ThQwHlH4uLB8TqxKQjD2k4G3YdSNMMrZYq/9WnZIgoLwP8uuxX11W9QRLxQaqP3A9DmTP10vqt7wbGteVUtYHSr5QFt4MIj+sg8xMQ72ec3rP8jGxKgHJ2EMKAtjphhGZpvxdLdbqv1ukpyTAs6iuyZ+Bpb+MSmYA7fH2WokWQ0yxxBYHqxqpHMxxquVQdjmHuZJbHkrV8WEq/333cHSC0WoFAAA=') format('woff2'),
+  url('font/iconfont.woff?t=1582364888595') format('woff'),
+  url('font/iconfont.ttf?t=1582364888595') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+ */
+  url('font/iconfont.svg?t=1582364888595#iconfont-') format('svg'); /* iOS 4.1- */
+}
+
+[class*=" icon"], [class^=icon] {
+  font-family: "iconfont-" !important;
+  speak: none;
+  font-style: normal;
+  font-variant: normal;
+  text-transform: none;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /*margin-right: 10px;*/
+}
+
+.iconbofang:before {
+  content: "\e60e";
+}
+
+.iconzanting:before {
+  content: "\e618";
+}
+
+.iconkuaijin:before {
+  content: "\e73c";
+}
+
+.iconkuaitui:before {
+  content: "\e73d";
+}
+
+.iconziyuan:before {
+  content: "\e615";
+}
+
+.iconziyuan1:before {
+  content: "\e616";
+}
+

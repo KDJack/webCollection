@@ -1,0 +1,57 @@
+/*媒体查询*/
+@media screen and (max-width: 359px) {
+  html, body {
+    font-size:500% !important;
+  }
+}
+
+@media screen and (min-width: 360px) and (max-width: 420px) {
+  html, body {
+    font-size: 625% !important;
+  }
+}
+
+@media screen and (min-width: 420px) and (max-width: 639px) {
+  html, body {
+    font-size: 875% !important;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  html, body {
+    font-size: 1250% !important;
+  }
+}
+
+html {
+  font-size: 625%;
+}
+
+html, body, header, footer, nav, ul, li, a, span, div, h1, h2, h3, input,
+img, p, table, thead, th, tbody, tr, td {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-decoration: none;
+  box-sizing: border-box;
+  font-weight: normal;
+}
+
+body {
+  height: 100%;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+* {
+ -webkit-user-select: none; /* Webkit */
+ -moz-user-select: none;    /* Firefox */
+ -ms-user-select: none;     /* IE 10  */
+ /* Currently not supported in Opera but will be soon */
+ -o-user-select: none;
+ user-select: none;
+}
